@@ -1,5 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { BadRequestException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 
 import { RegisterDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
@@ -9,11 +14,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @UsePipes(ValidationPipe)
   async register(@Body() registerDto: RegisterDto): Promise<any> {
-    try {
-      return await this.authService.register(registerDto);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
+    return await this.authService.register(registerDto);
   }
 }

@@ -26,6 +26,12 @@ export class User {
 
   @Prop({
     type: String,
+    required: false,
+  })
+  refreshToken: string;
+
+  @Prop({
+    type: String,
     required: true,
   })
   password: string;
