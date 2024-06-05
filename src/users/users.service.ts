@@ -13,7 +13,10 @@ export class UsersService {
   constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
-    const createdUser = new this.userModel(createUserDto);
+    const createdUser = new this.userModel({
+      ...createUserDto,
+      refreshToken: null,
+    });
     return await createdUser.save();
   }
 
@@ -22,27 +25,26 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<UserDocument> {
-    return await this.userModel.findOne({
-      email,
-    });
+    return await this.userModel
+      .findOne(
+        {
+          email,
+        },
+        '-refreshToken',
+      )
+      .exec();
   }
 
   async query(filter: QueryUserDto): Promise<UserDocument[]> {
-    return await this.userModel.find(filter).exec();
+    return await this.userModel.find(filter, '-password').exec();
   }
 
   async updateRefreshToken(
     id: mongoose.Types.ObjectId,
     refreshToken: string,
   ): Promise<UserDocument> {
-    return await this.userModel.findByIdAndUpdate(
-      id,
-      {
-        refreshToken,
-      },
-      {
-        new: true,
-      },
-    );
+    return await this.userModel.findByIdAndUpdate(id, {
+      refreshToken,
+    });
   }
 }
