@@ -1,6 +1,5 @@
 export class SuccesssResponse {
-  constructor(message: string, statusCode: number = 200) {
-    this.status = statusCode;
+  constructor(message: string) {
     this.success = true;
     this.message = message;
   }
@@ -21,7 +20,11 @@ export class PaginationMetadata {
 }
 
 export class PaginationResponse {
-  data: any[];
+  constructor(data: any[], metadata?: PaginationMetadata) {
+    this.data = data;
+    this.metadata = metadata;
+  }
 
+  data: any[];
   metadata: PaginationMetadata;
 }
