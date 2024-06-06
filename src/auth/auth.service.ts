@@ -1,14 +1,12 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import * as bcrypt from 'bcrypt';
-import mongoose from 'mongoose';
 
 import { UsersService } from 'src/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-
-import { SuccesssResponse } from 'src/common/types/response';
+import { JwtPayload } from 'src/common/types/jwt-payload';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +15,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<SuccesssResponse> {
+  async register(registerDto: RegisterDto): Promise<boolean> {
     try {
       const user = await this.usersService.findByEmail(registerDto.email);
       if (user) {
@@ -28,10 +26,7 @@ export class AuthService {
         password: await this.hashPassword(registerDto.password),
       });
 
-      return new SuccesssResponse(
-        'User created successfully',
-        HttpStatus.CREATED,
-      );
+      return true;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -41,7 +36,7 @@ export class AuthService {
     try {
       const user = await this.usersService.findByEmail(loginDto.email);
       if (!user) {
-        throw new Error('User not found');
+        throw new BadRequestException('User not found');
       }
 
       const isPasswordMatch = await bcrypt.compare(
@@ -49,18 +44,15 @@ export class AuthService {
         user.password,
       );
       if (!isPasswordMatch) {
-        throw new Error('Password does not match');
+        throw new BadRequestException('Password does not match');
       }
 
       return {
-        ...(await this.genarateToken({
-          email: user.email,
-          id: user._id,
-        })),
+        ...(await this.genarateToken(new JwtPayload(user.email, user._id))),
         user: {
+          id: user._id,
           email: user.email,
           username: user.username,
-          id: user._id,
         },
       };
     } catch (error) {
@@ -68,20 +60,34 @@ export class AuthService {
     }
   }
 
-  async genarateToken(payload: { email: string; id: mongoose.Types.ObjectId }) {
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.ACCESS_TOKEN_SECRET,
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRATION,
-    });
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.REFRESH_TOKEN_SECRET,
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
-    });
+  async genarateToken(
+    payload: JwtPayload,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const accessToken = await this.jwtService.signAsync(
+      {
+        id: payload.id,
+        email: payload.email,
+      },
+      {
+        secret: process.env.ACCESS_TOKEN_SECRET,
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRATION,
+      },
+    );
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        id: payload.id,
+        email: payload.email,
+      },
+      {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
+      },
+    );
     await this.usersService.updateRefreshToken(payload.id, refreshToken);
     return { accessToken, refreshToken };
   }
 
-  async hashPassword(password: string): Promise<any> {
+  async hashPassword(password: string): Promise<string> {
     const saltRound: number = Number(process.env.SALT_ROUND) || 10;
     const salt: string = await bcrypt.genSalt(saltRound);
     return await bcrypt.hash(password, salt);

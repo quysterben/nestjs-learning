@@ -20,8 +20,8 @@ export class UsersService {
     return await createdUser.save();
   }
 
-  async findById(id: string): Promise<UserDocument> {
-    return await this.userModel.findById(id).exec();
+  async findById(id: mongoose.Types.ObjectId): Promise<UserDocument> {
+    return await this.userModel.findById(id, '-password -refreshToken').exec();
   }
 
   async findByEmail(email: string): Promise<UserDocument> {
@@ -36,7 +36,7 @@ export class UsersService {
   }
 
   async query(filter: QueryUserDto): Promise<UserDocument[]> {
-    return await this.userModel.find(filter, '-password').exec();
+    return await this.userModel.find(filter, '-password -refreshToken').exec();
   }
 
   async updateRefreshToken(

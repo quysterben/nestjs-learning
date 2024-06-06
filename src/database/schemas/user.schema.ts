@@ -1,5 +1,6 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { ROLE_CONSTANTS } from 'src/common/constants/Common';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -17,6 +18,13 @@ export class User {
     required: true,
   })
   username: string;
+
+  @Prop({
+    type: Number,
+    required: true,
+    default: ROLE_CONSTANTS.USER,
+  })
+  role: number;
 
   @Prop({
     type: String,
