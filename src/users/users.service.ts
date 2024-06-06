@@ -36,7 +36,16 @@ export class UsersService {
   }
 
   async query(filter: QueryUserDto): Promise<UserDocument[]> {
-    return await this.userModel.find(filter, '-password -refreshToken').exec();
+    const queryBuilder = this.userModel
+      .find({}, '-password -refreshToken')
+      .where('email', new RegExp(filter.email, 'i'))
+      .where('username', new RegExp(filter.username, 'i'));
+
+    if (filter.role) {
+      queryBuilder.where('role', filter.role);
+    }
+
+    return await queryBuilder.exec();
   }
 
   async updateRefreshToken(

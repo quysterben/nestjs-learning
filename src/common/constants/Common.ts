@@ -1,4 +1,4 @@
 export const ROLE_CONSTANTS = {
-  ADMIN: 1,
-  USER: 2,
+  ADMIN: '1',
+  USER: '2',
 };
