@@ -1,15 +1,24 @@
-import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Response } from 'express';
 
 import { UsersService } from './users.service';
 import { QueryUserDto } from './dto/query-user.dto';
-import { Response } from 'express';
 import { PaginationResponse } from 'src/common/types/response';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getUsers(
     @Query() filter: QueryUserDto,
     @Res() res: Response,

@@ -1,26 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import { CanActivate, ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
+import {
+  ExecutionContext,
+  HttpException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  canActivate(context: ExecutionContext) {
+    return super.canActivate(context);
+  }
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Observable<boolean> | Promise<boolean> {
-    const isPublic = this.reflector.getAll('isPublic', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    if (isPublic) return true;
+  handleRequest(err: any, user: any, info: any) {
+    if (err || !user || info) {
+      if (info?.message === 'jwt expired') {
+        throw new HttpException('Token expired', 419);
+      }
 
-    const request = context.switchToHttp().getRequest();
-    if (!request.headers.authorization) {
-      return false;
+      throw err || new UnauthorizedException(info?.message);
     }
 
-    return true;
+    return user;
   }
 }
