@@ -7,6 +7,7 @@ import { UsersService } from 'src/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtPayload } from 'src/common/types/jwt-payload';
+import { UserDocument } from 'src/database/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -54,6 +55,45 @@ export class AuthService {
           email: user.email,
           username: user.username,
         },
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async logout(currUser: UserDocument): Promise<boolean> {
+    try {
+      await this.usersService.updateRefreshToken(currUser._id, null);
+      return true;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async generateTokenFromRefreshToken(
+    refreshToken: string,
+    currUser: UserDocument,
+  ): Promise<any> {
+    try {
+      const user = await this.usersService.findById(currUser._id);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+      if (user.refreshToken !== refreshToken) {
+        throw new BadRequestException('Invalid refresh token');
+      }
+      const newAccessToken = await this.jwtService.signAsync(
+        {
+          id: currUser._id,
+          email: currUser.email,
+        },
+        {
+          secret: process.env.ACCESS_TOKEN_SECRET,
+          expiresIn: process.env.ACCESS_TOKEN_EXPIRATION,
+        },
+      );
+      return {
+        accessToken: newAccessToken,
       };
     } catch (error) {
       throw new BadRequestException(error.message);

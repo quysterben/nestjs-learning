@@ -21,7 +21,7 @@ export class UsersService {
   }
 
   async findById(id: mongoose.Types.ObjectId): Promise<UserDocument> {
-    return await this.userModel.findById(id, '-password -refreshToken').exec();
+    return await this.userModel.findById(id, '-password').exec();
   }
 
   async findByEmail(email: string): Promise<UserDocument> {
