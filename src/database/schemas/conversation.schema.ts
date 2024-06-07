@@ -25,6 +25,13 @@ export class Conversation {
   conversationImage: string;
 
   @Prop({
+    type: mongoose.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  })
+  creatorId: mongoose.Types.ObjectId;
+
+  @Prop({
     type: mongoose.Types.Array,
     required: true,
     ref: 'User',

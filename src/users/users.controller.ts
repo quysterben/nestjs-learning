@@ -12,7 +12,6 @@ import { UsersService } from './users.service';
 import { QueryUserDto } from './dto/query-user.dto';
 import { PaginationResponse } from 'src/common/types/response';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -21,7 +20,6 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getUsers(
-    @CurrentUser() user,
     @Query() filter: QueryUserDto,
     @Res() res: Response,
   ): Promise<Response> {
