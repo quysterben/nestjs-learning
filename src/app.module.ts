@@ -6,6 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { MessagesModule } from './messages/messages.module';
+import { CloudinaryController } from './cloudinary/cloudinary.controller';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -17,7 +19,9 @@ import { MessagesModule } from './messages/messages.module';
     UsersModule,
     ConversationsModule,
     MessagesModule,
+    CloudinaryModule,
   ],
   providers: [],
+  controllers: [CloudinaryController],
 })
 export class AppModule {}

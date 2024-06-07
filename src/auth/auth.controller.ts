@@ -56,19 +56,11 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(JwtAuthGuard)
-  async refresh(
-    @Body() req: any,
-    @Res() res: Response,
-    @CurrentUser() currUser: UserDocument,
-  ): Promise<Response> {
+  async refresh(@Body() req: any, @Res() res: Response): Promise<Response> {
     return res
       .status(HttpStatus.ACCEPTED)
       .json(
-        await this.authService.generateTokenFromRefreshToken(
-          req.refreshToken,
-          currUser,
-        ),
+        await this.authService.generateTokenFromRefreshToken(req.refreshToken),
       );
   }
 }

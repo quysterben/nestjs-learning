@@ -70,12 +70,15 @@ export class AuthService {
     }
   }
 
-  async generateTokenFromRefreshToken(
-    refreshToken: string,
-    currUser: UserDocument,
-  ): Promise<any> {
+  async generateTokenFromRefreshToken(refreshToken: string): Promise<any> {
     try {
-      const user = await this.usersService.findById(currUser._id);
+      const payload: JwtPayload = await this.jwtService.verifyAsync(
+        refreshToken,
+        {
+          secret: process.env.REFRESH_TOKEN_SECRET,
+        },
+      );
+      const user = await this.usersService.findById(payload.id);
       if (!user) {
         throw new BadRequestException('User not found');
       }
@@ -84,8 +87,8 @@ export class AuthService {
       }
       const newAccessToken = await this.jwtService.signAsync(
         {
-          id: currUser._id,
-          email: currUser.email,
+          id: user._id,
+          email: user.email,
         },
         {
           secret: process.env.ACCESS_TOKEN_SECRET,
