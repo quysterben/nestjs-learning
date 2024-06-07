@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConversationsModule } from './conversations/conversations.module';
-import { MessagesService } from './messages/messages.service';
 import { MessagesModule } from './messages/messages.module';
 
 @Module({
@@ -19,6 +18,6 @@ import { MessagesModule } from './messages/messages.module';
     ConversationsModule,
     MessagesModule,
   ],
-  providers: [MessagesService],
+  providers: [],
 })
 export class AppModule {}
