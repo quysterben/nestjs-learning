@@ -17,6 +17,7 @@ import { UsersService } from './users.service';
 import { QueryUserDto } from './dto/query-user.dto';
 import { PaginationResponse } from 'src/common/types/response';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { diskStorage } from 'multer';
 
 @Controller('users')
 export class UsersController {
@@ -34,12 +35,24 @@ export class UsersController {
 
   @Post('upload-avatar')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './storage/images',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          return cb(null, `${randomName}${file.originalname}`);
+        },
+      }),
+    }),
+  )
   async uploadAvatar(
     @UploadedFile(
       new ParseFilePipeBuilder()
-        .addFileTypeValidator({ fileType: 'jpeg, jpg, png' })
-        .addMaxSizeValidator({ maxSize: 1024 * 1024 })
+        .addFileTypeValidator({ fileType: 'image' })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
         }),
@@ -47,7 +60,6 @@ export class UsersController {
     file: Express.Multer.File,
     @Res() res: Response,
   ): Promise<Response> {
-    console.log(file);
     return res.status(HttpStatus.OK).json({ message: 'Avatar uploaded' });
   }
 }

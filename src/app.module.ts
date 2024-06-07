@@ -8,7 +8,7 @@ import { ConversationsModule } from './conversations/conversations.module';
 import { MessagesModule } from './messages/messages.module';
 import { CloudinaryController } from './cloudinary/cloudinary.controller';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
-
+import { MulterModule } from '@nestjs/platform-express';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -20,6 +20,11 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     ConversationsModule,
     MessagesModule,
     CloudinaryModule,
+    MulterModule.registerAsync({
+      useFactory: () => ({
+        dest: './uploads',
+      }),
+    }),
   ],
   providers: [],
   controllers: [CloudinaryController],
