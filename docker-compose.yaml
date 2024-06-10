@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  nestjs-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs-server
+    command: yarn start:dev
+    ports:
+      - '9900:9900'
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    networks:
+      - nestjs-network
+networks:
+  nestjs-network:
+    driver: bridge
