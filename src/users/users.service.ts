@@ -7,10 +7,14 @@ import { UserDocument } from 'src/database/schemas/user.schema';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { QueryUserDto } from './dto/query-user.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel('User') private userModel: Model<UserDocument>,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
     const createdUser = new this.userModel({
@@ -46,6 +50,20 @@ export class UsersService {
     }
 
     return await queryBuilder.exec();
+  }
+
+  async updateAvatar(avatar: Express.Multer.File, id: mongoose.Types.ObjectId) {
+    const user = await this.userModel.findById(id);
+
+    if (user.avatarUrl) {
+      await this.cloudinaryService.destroyFile(user.avatarUrl);
+    }
+
+    const cloudinaryRes = await this.cloudinaryService.uploadFile(avatar);
+
+    return await this.userModel.findByIdAndUpdate(id, {
+      avatarUrl: cloudinaryRes.secure_url,
+    });
   }
 
   async updateRefreshToken(

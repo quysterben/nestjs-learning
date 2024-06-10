@@ -1,3 +1,6 @@
+import * as path from 'path';
+import * as fs from 'fs';
+
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import { v2 as cloudinary } from 'cloudinary';
@@ -6,7 +9,7 @@ import { CloudinaryResponse } from './types/cloudinary-response';
 @Injectable()
 export class CloudinaryService {
   async uploadFile(file: Express.Multer.File): Promise<CloudinaryResponse> {
-    const folderPath = process.env.FOLDER_PATH || `res/images`;
+    const folderPath = process.env.FOLDER_PATH || `nestjs/`;
 
     try {
       const uploadedFile = await cloudinary.uploader.upload(file.path, {
@@ -16,6 +19,7 @@ export class CloudinaryService {
       if (!uploadedFile) {
         throw new Error('File not uploaded');
       }
+      this.clearFile(file.path);
       return uploadedFile;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
@@ -34,5 +38,13 @@ export class CloudinaryService {
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  public clearFile(filePath: string): boolean {
+    filePath = path.join(__dirname, '..', '..', filePath);
+    fs.unlink(filePath, (err) => {
+      console.log(err);
+    });
+    return true;
   }
 }

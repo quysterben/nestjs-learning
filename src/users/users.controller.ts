@@ -11,13 +11,15 @@ import {
   ParseFilePipeBuilder,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 import { Response } from 'express';
 
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { UserDocument } from 'src/database/schemas/user.schema';
 import { UsersService } from './users.service';
 import { QueryUserDto } from './dto/query-user.dto';
 import { PaginationResponse } from 'src/common/types/response';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { diskStorage } from 'multer';
 
 @Controller('users')
 export class UsersController {
@@ -58,8 +60,10 @@ export class UsersController {
         }),
     )
     file: Express.Multer.File,
+    @CurrentUser() currUser: UserDocument,
     @Res() res: Response,
   ): Promise<Response> {
-    return res.status(HttpStatus.OK).json({ message: 'Avatar uploaded' });
+    const result = await this.usersService.updateAvatar(file, currUser._id);
+    return res.status(HttpStatus.OK).json(result);
   }
 }

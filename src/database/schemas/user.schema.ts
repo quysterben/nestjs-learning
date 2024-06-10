@@ -29,6 +29,7 @@ export class User {
   @Prop({
     type: String,
     required: false,
+    default: null,
   })
   avatarUrl: string;
 
