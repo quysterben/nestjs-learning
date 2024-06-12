@@ -73,7 +73,7 @@ jobs:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_PKEY }}
-          port: ${{ secrets.DO_PORT }}\
+          port: ${{ secrets.DO_PORT }}
           script: |
             docker ps -q --filter "name=nestjs-server" | grep -q . && docker stop nestjs-server
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nestjs-server:${{ env.IMAGE_TAG }}
