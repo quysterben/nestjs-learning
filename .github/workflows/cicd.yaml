@@ -67,14 +67,14 @@ jobs:
         run: echo "IMAGE_TAG value is ${{ needs.build-docker-image.outputs.IMAGE_TAG }}"
       - name: executing remote ssh
         env:
-          IMAGE_TAG: ${{ needs.build-docker-image.outputs.IMAGE_TAG }}
+          IMAGE_TAG: ${{ needs.build-docker-image.outputs.IMAGE_TAG }}\
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_PKEY }}
-          port: ${{ secrets.DO_PORT }}
+          port: ${{ secrets.DO_PORT }}\
           script: |
             docker ps -q --filter "name=nestjs-server" | grep -q . && docker stop nestjs-server
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/nestjs-server:${{ env.IMAGE_TAG }}
-            docker run -d --rm --name nestjs-server ${{ secrets.DOCKERHUB_USERNAME }}/nestjs-server:${{ env.IMAGE_TAG }}
+            docker run -d -p 9900:9900 --rm --name nestjs-server ${{ secrets.DOCKERHUB_USERNAME }}/nestjs-server:${{ env.IMAGE_TAG }}
