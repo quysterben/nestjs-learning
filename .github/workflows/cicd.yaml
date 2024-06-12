@@ -67,7 +67,7 @@ jobs:
         run: echo "IMAGE_TAG value is ${{ needs.build-docker-image.outputs.IMAGE_TAG }}"
       - name: executing remote ssh
         env:
-          IMAGE_TAG: ${{ needs.build-docker-image.outputs.IMAGE_TAG }}\
+          IMAGE_TAG: ${{ needs.build-docker-image.outputs.IMAGE_TAG }}
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DO_HOST }}
