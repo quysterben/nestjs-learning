@@ -68,7 +68,7 @@ jobs:
       - name: executing remote ssh
         env:
           IMAGE_TAG: ${{ needs.build-docker-image.outputs.IMAGE_TAG }}
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
