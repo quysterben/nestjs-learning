@@ -52,7 +52,7 @@ export class AuthController {
     await this.authService.logout(currUser);
     return res
       .status(HttpStatus.ACCEPTED)
-      .json(new SuccesssResponse('User logged out successfully'));
+      .json(new SuccesssResponse('User logged out successfullysssss'));
   }
 
   @Post('refresh')

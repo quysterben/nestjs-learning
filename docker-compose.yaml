@@ -1,22 +1,22 @@
-version: '3.8'
-
+version: "3.8"
 services:
-  nestjs-server:
+  nodeserver:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: nestjs-server
-    command: yarn start:dev
-    ports:
-      - '9900:9900'
+      dockerfile: .docker/services/nodejs/Dockerfile
+    working_dir: /var/www/app
     restart: unless-stopped
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/var/www/app
+      - /var/www/app/src/node_modules
+      - ./storage:/var/www/storage
     env_file:
       - .env
-    networks:
-      - nestjs-network
-networks:
-  nestjs-network:
-    driver: bridge
+  nginx:
+    restart: always
+    build:
+      context: ./.docker/services/nginx
+    ports:
+      - "9900:80"
+    depends_on:
+      - nodeserver
