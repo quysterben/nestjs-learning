@@ -4,7 +4,6 @@ services:
     build:
       context: .
       dockerfile: .docker/services/nodejs/Dockerfile
-    working_dir: /var/www/app
     restart: unless-stopped
     volumes:
       - .:/var/www/app
