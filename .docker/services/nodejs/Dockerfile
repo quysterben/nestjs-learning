@@ -12,4 +12,6 @@ WORKDIR /var/www/app
 
 COPY . .
 
-CMD ["yarn", "start:dev"]
+RUN yarn build
+
+CMD ["yarn", "start:prod"]
