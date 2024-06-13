@@ -48,8 +48,8 @@ jobs:
         uses: docker/build-push-action@v5
         id: docker_build_server
         with:
-          context: ./.docker/services/nodejs
-          file: Dockerfile
+          context: .
+          file: .docker/services/nodejs/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/nestjs-server:${{ env.IMAGE_TAG }}
       - name: Verify
