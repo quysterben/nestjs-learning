@@ -11,11 +11,74 @@ services:
       - ./storage:/var/www/storage
     env_file:
       - .env
+    networks:
+      - es-net
   nginx:
     restart: always
     build:
-      context: ./.docker/services/nginx
+      context: .docker/services/nginx
     ports:
       - "9900:80"
     depends_on:
       - nodeserver
+    networks:
+      - es-net
+  setup:
+    profiles:
+      - setup
+    build:
+      context: .docker/services/setup/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    init: true
+    volumes:
+      - ./.docker/services/setup/entrypoint.sh:/entrypoint.sh:ro,Z
+      - ./.docker/services/setup/lib.sh:/lib.sh:ro,Z
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    networks:
+      - es-net
+    depends_on:
+      - elasticsearch
+  elasticsearch:
+    build:
+      context: .docker/services/elasticsearch/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    environment:
+      node.name: elasticsearch
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      discovery.type: single-node
+    volumes:
+      - ./.docker/services/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./.docker/services/elasticsearch:/usr/share/elasticsearch/data:Z
+    networks:
+      - es-net
+    ports:
+      - ${ELASTIC_PORT:-9200}:9200
+    restart: unless-stopped
+  kibana:
+    container_name: kibana
+    build:
+      context: .docker/services/kibana/
+      args:
+        ELASTIC_VERSION: ${ELASTIC_VERSION}
+    environment:
+      ELASTICSEARCH_HOSTS: ${ELASTIC_HOST:-http://elasticsearch:9200}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+    volumes:
+      - ./.docker/services/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./.docker/services/kibana:/usr/share/kibana/data:Z
+    networks:
+      - es-net
+    depends_on:
+      - elasticsearch
+    ports:
+      - ${KIBANA_PORT:-5601}:5601
+    restart: unless-stopped
+
+networks:
+  es-net:
+    driver: bridge

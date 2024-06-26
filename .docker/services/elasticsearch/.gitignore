@@ -1,0 +1,6 @@
+/_state
+/indices
+/snapshot_cache
+
+node.lock
+nodes
